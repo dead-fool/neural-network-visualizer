@@ -72,7 +72,7 @@ void glhPerspectivef2(float* matrix, float fovyInDegrees, float aspectRatio,
 
 using namespace std;
 
-bool flag = true;
+bool flag = false;
 GLfloat xRotated, yRotated, zRotated;
 
 void check(int value)
@@ -171,12 +171,12 @@ void displayPoint(GLfloat x, GLfloat y, GLfloat z, GLfloat size)
     glEnd();
 }
 
-void displayLine(GLfloat a, GLfloat b, GLfloat c, GLfloat transparency) {
+void displayLine(GLfloat a1, GLfloat b1, GLfloat c1, GLfloat a2, GLfloat b2, GLfloat c2, GLfloat transparency, GLfloat R, GLfloat G, GLfloat B) {
     glBegin(GL_LINE_LOOP);
-    glColor4f(1.0, 1.0, 1.0, transparency);
-    glVertex3f(a, b, c);
-    glVertex3f(0.1 + b, (0.1 + c)*2, 0.4);
-    glVertex3f(0.1 + b, (0.1 + c)*2, 0.4);
+    glColor4f(R,G,B, transparency * 0.001);
+    glVertex3f(a1, b1, c1);
+    glVertex3f(a2, b2, c2);
+    glVertex3f(a2, b2, c2);
     glEnd();
 }
 
@@ -204,118 +204,175 @@ void displaynetwork(GLFWwindow* window)
 
 
     //output
+    
+    
 
-    for (a = 0; a <= 1.35; a += 0.135)
+    int a1 = 27, b1 = 0;
+
+    for (a = 0; a <= 1.35; a = a + 0.05)
+    {
+        b1 = 0;
+        for (b = 0; b <= 1.35; b = b + 0.05)
+        {
+            //Input Layer 
+            glPointSize(5.0);
+            glBegin(GL_POINTS);
+            glColor4f(0.0, 0.0, input_activation[select][a1 * 28 + b1], 1.0);
+            glVertex3f(0.05 + b, (0.05 + a), 0.0);
+            glEnd();
+            b1++;
+            //input_activation[0][a1 * 28 +b1]
+        }
+        a1--;
+    }
+        
+    a1 = 31, b1 = 0;
+        
+    //fc1
+    for (a = 0.275; a < 1.05; a += 0.025)
+    {
+        b1 = 0;
+        for (b = 0.275; b < 1.05; b += 0.025)
+        {
+            //fc1 
+            glPointSize(1.0);
+            glBegin(GL_POINTS);
+            glColor4f(0.0, fc1_activation[select][a1 * 32 + b1], 0.0, 1);
+            glVertex3f(0.025 + b, (0.025 + a), 0.75);
+            glEnd();
+            b1++;
+        }
+        a1--;
+    }
+    a1 = 31;
+    //fc2
+    for (a = 0.275; a < 1.05; a += 0.025)
+    {
+        b1 = 0;
+        for (b = 0.275; b < 1.05; b += 0.025)
+        {
+            //fc1 
+            glPointSize(1.0);
+            glBegin(GL_POINTS);
+            glColor4f(0.0, fc2_activation[select][a1 * 32 + b1], 0.0, 1);
+            glVertex3f(0.025 + b, (0.025 + a), 1.5);
+            glEnd();
+            b1++;
+        }
+        a1--;
+    }
+
+    a1 = 31;
+    //fc3
+    for (a = 0.275; a < 1.05; a += 0.025)
+    {
+        b1 = 0;
+        for (b = 0.275; b < 1.05; b += 0.025)
+        {
+            //fc3 
+            glPointSize(1.0);
+            glBegin(GL_POINTS);
+            glColor4f(fc3_activation[select][a1 * 32 + b1], 0.0, 0.0, 1);
+            glVertex3f(0.025 + b, (0.025 + a), 2.25);
+            glEnd();
+            b1++;
+        }
+        a1--;
+    }
+
+    a1 = 0;
+    //fc4
+
+    for (a = 0; a < 1.35; a += 0.135)
+    {
+        glPointSize(3.0);
+        glBegin(GL_POINTS);
+        glColor4f(0.0, 1.0, fc4_activation[0][a1], 1.0);
+        glVertex3f(a, 0.675, 3);
+        glEnd();
+        a1++;
+    }
+
+    //output
+    a1 = 0;
+    for (a = 0; a < 1.35; a += 0.135)
     {
         glPointSize(5.0);
         glBegin(GL_POINTS);
-        glColor4f(1.0, 1.0, 1.0, 0.2);
+        glColor4f(1.0, output_activation[select][a1], 1.0, 1.0);
         glVertex3f(a, 0.675, 3.75);
         glEnd();
+        a1++;
     }
-    
-    
+
     if (flag == true)
     {
-        int a1 = 27, b1 = 0;
-
-        for (a = 0; a <= 1.35; a = a + 0.05)
-        {
-            b1 = 0;
-            for (b = 0; b <= 1.35; b = b + 0.05)
-            {
-                //Input Layer 
-                glPointSize(5.0);
-                glBegin(GL_POINTS);
-                glColor4f(0.0, 0.0, input_activation[select][a1 * 28 + b1], 1.0);
-                glVertex3f(0.05 + b, (0.05 + a), 0.0);
-                glEnd();
-                b1++;
-                //input_activation[0][a1 * 28 +b1]
+        // display the networks
+        for (int i = 0; i < 28; i++) {
+            for (int i1 = 0; i1 < 28; i1++) {
+                for (int j = 0; j < 32; j++) {
+                    for (int j1 = 0; j1 < 32; j1++) {
+                        if (fc1_activation[select][(31 - j) * 32 + j1] > 0.4) {
+                            float a1 = i * 0.05 + 0.05, b1 = (i1 + 1) * 0.05;
+                            float a2 = (j + 1) * 0.025 + 0.275, b2 = (j1 + 1) * 0.025 + 0.275;
+                            displayLine(b1, a1, 0, a2, b2, 0.75, input_activation[select][(27 - i) * 28 + i1], 1, 0, 1);
+                        }
+                    }
+                }
             }
-            a1--;
         }
-        
-        a1 = 31, b1 = 0;
-        
-        //fc1
-        for (a = 0.275; a < 1.05; a += 0.025)
-        {
-            b1 = 0;
-            for (b = 0.275; b < 1.05; b += 0.025)
-            {
-                //fc1 
-                glPointSize(1.0);
-                glBegin(GL_POINTS);
-                glColor4f(0.0, fc1_activation[select][a1 * 32 + b1], 0.0, 1);
-                glVertex3f(0.025 + b, (0.025 + a), 0.75);
-                glEnd();
-                b1++;
+
+        for (int i = 0; i < 32; i++) {
+            for (int i1 = 0; i1 < 32; i1++) {
+                for (int j = 0; j < 32; j++) {
+                    for (int j1 = 0; j1 < 32; j1++) {
+                        if (fc2_activation[select][(31 - j) * 32 + j1] > 0.4) {
+                            float a1 = i * 0.025 + 0.025 + 0.275, b1 = (i1 + 1) * 0.025 + 0.275;
+                            float a2 = (j + 1) * 0.025 + 0.275, b2 = (j1 + 1) * 0.025 + 0.275;
+                            displayLine(b1, a1, 0.75, a2, b2, 1.5, fc1_activation[select][(31 - i) * 32 + i1], 0, 1, 1);
+                        }
+                    }
+                }
             }
-            a1--;
         }
-        a1 = 31;
-        //fc2
-        for (a = 0.275; a < 1.05; a += 0.025)
-        {
-            b1 = 0;
-            for (b = 0.275; b < 1.05; b += 0.025)
-            {
-                //fc1 
-                glPointSize(1.0);
-                glBegin(GL_POINTS);
-                glColor4f(0.0, fc2_activation[select][a1 * 32 + b1], 0.0, 1);
-                glVertex3f(0.025 + b, (0.025 + a), 1.5);
-                glEnd();
-                b1++;
+
+        for (int i = 0; i < 32; i++) {
+            for (int i1 = 0; i1 < 32; i1++) {
+                for (int j = 0; j < 32; j++) {
+                    for (int j1 = 0; j1 < 32; j1++) {
+                        if (fc3_activation[select][(31 - j) * 32 + j1] > 0.4) {
+                            float a1 = i * 0.025 + 0.025 + 0.275, b1 = (i1 + 1) * 0.025 + 0.275;
+                            float a2 = (j + 1) * 0.025 + 0.275, b2 = (j1 + 1) * 0.025 + 0.275;
+                            displayLine(b1, a1, 1.5, a2, b2, 2.25, fc2_activation[select][(31 - i) * 32 + i1], 0, 0, 1);
+                        }
+                    }
+                }
             }
-            a1--;
         }
 
-        a1 = 31;
-        //fc3
-        for (a = 0.275; a < 1.05; a += 0.025)
-        {
-            b1 = 0;
-            for (b = 0.275; b < 1.05; b += 0.025)
-            {
-                //fc3 
-                glPointSize(1.0);
-                glBegin(GL_POINTS);
-                glColor4f(fc3_activation[select][a1 * 32 + b1], 0.0, 0.0, 1);
-                glVertex3f(0.025 + b, (0.025 + a), 2.25);
-                glEnd();
-                b1++;
+        for (int i = 0; i < 32; i++) {
+            for (int i1 = 0; i1 < 32; i1++) {
+                for (int j = 0; j < 10; j++) {
+                    if (fc4_activation[select][j] > 0.4) {
+                        float a1 = i * 0.025 + 0.025 + 0.275, b1 = (i1 + 1) * 0.025 + 0.275;
+                        float a2 = (j) * 0.135, b2 = 0.675;
+                        displayLine(b1, a1, 2.25, a2, b2, 3, fc3_activation[select][(31 - i) * 32 + i1] * 5, 0, 1, 1);
+                    }
+                }
             }
-            a1--;
         }
 
-        a1 = 0;
-        //fc4
-
-        for (a = 0; a < 1.35; a += 0.135)
+        for (int i = 0; i < 10; i++)
         {
-            glPointSize(3.0);
-            glBegin(GL_POINTS);
-            glColor4f(0.0, 1.0, fc4_activation[0][a1], 1.0);
-            glVertex3f(a, 0.675, 3);
-            glEnd();
-            a1++;
+            for (int j = 0; j < 10; j++)
+            {
+                if (output_activation[select][j] < 0.3) {
+                    float a1 = i * 0.025 + 0.025 + 0.275, b1 = 0.675;
+                    float a2 = (j) * 0.135, b2 = 0.675;
+                    displayLine(a1, b1, 3, a2, b2, 3.75, fc4_activation[select][i] * 100, 0.5, 1, 0.7);
+                }
+            }
         }
-
-        //output
-        a1 = 0;
-        for (a = 0; a < 1.35; a += 0.135)
-        {
-            glPointSize(5.0);
-            glBegin(GL_POINTS);
-            glColor4f(1.0, output_activation[select][a1], 1.0, 1.0);
-            glVertex3f(a, 0.675, 3.75);
-            glEnd();
-            a1++;
-        }
-
-        
     }
 
 
@@ -353,14 +410,12 @@ void idlenetwork(GLFWwindow* window)
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
 
-    /*
-    if (button == GLFW_MOUSE_BUTTON_LEFT)
+    
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
     {
-        double xpos, ypos;
-        glfwGetCursorPos(window, &xpos, &ypos);
-        yPosDelta = ypos - yposPrev;
+        flag = !flag;
     }
-    */
+    
     if (action = GLFW_PRESS && button == GLFW_MOUSE_BUTTON_RIGHT) {
         select++;
     }
