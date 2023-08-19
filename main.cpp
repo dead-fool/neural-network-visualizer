@@ -13,6 +13,21 @@
 #include <conio.h>
 #include "iostream"
 #include <time.h>
+static double yPosDelta = 0.0;
+static double xPosDelta = 0.0;
+static double xRotationDelta = 0.0;
+static double zRotationDelta = 0.0;
+static int select = 0;
+std::vector<std::vector<float> > input_activation;
+std::vector<std::vector<float> > fc1_activation;
+std::vector<std::vector<float> > fc2_activation;
+std::vector<std::vector<float> > fc3_activation;
+std::vector<std::vector<float> > fc4_activation;
+std::vector<std::vector<float> > output_activation;
+
+
+
+//static vector< vector<float> > input_activation;
 
 void glhFrustumf2(float* matrix, float left, float right, float bottom, float top,
     float znear, float zfar)
@@ -147,6 +162,24 @@ void highlight_lines(float x, float y, float z, float live_transparency_line)
     }
 }
 
+void displayPoint(GLfloat x, GLfloat y, GLfloat z, GLfloat size)
+{
+    glPointSize(size);
+    glBegin(GL_POINTS);
+    glColor4f(1.0, 1.0, 1.0, 0.05);
+    glVertex3f(x, y, z);
+    glEnd();
+}
+
+void displayLine(GLfloat a, GLfloat b, GLfloat c, GLfloat transparency) {
+    glBegin(GL_LINE_LOOP);
+    glColor4f(1.0, 1.0, 1.0, transparency);
+    glVertex3f(a, b, c);
+    glVertex3f(0.1 + b, (0.1 + c)*2, 0.4);
+    glVertex3f(0.1 + b, (0.1 + c)*2, 0.4);
+    glEnd();
+}
+
 void displaynetwork(GLFWwindow* window)
 {
     glMatrixMode(GL_MODELVIEW);
@@ -160,160 +193,132 @@ void displaynetwork(GLFWwindow* window)
     // Red color used to draw.
     glColor3f(0.8, 0.2, 0.1);
     glRotatef(yRotated, 0.0, 1.0, 0.0);
-    glScalef(2.0, 2.0, 2.0);
-
-    float dead_transparency_line = 0.08;
-    float live_transparency_line = 0.15;
+    glRotatef(xRotated, 1.0, 0.0, 0.0);
+    glRotatef(zRotated, 0.0, 0.0, 1.0);
+    glScalef(0.5, 0.5, 0.5);
+    glEnable(GL_BLEND);
+    float dead_transparency_line = 0.2;
+    float live_transparency_line = 0.5;
     float a, b, c;
-    for (a = 0; a <= 0.5; a = a + 0.1)
+
+
+
+    //output
+
+    for (a = 0; a <= 1.35; a += 0.135)
     {
-        for (b = 0; b <= 0.5; b = b + 0.1)
-        {
-            for (c = 0; c <= 0.5; c = c + 0.1)
-            {
-                //Input Layer 
-                glPointSize(15.0);
-                glBegin(GL_POINTS);
-                glColor4f(1.0, 1.0, 1.0, 0);
-                glVertex3f(0.1 + b, 0.1 + a, 0.0);
-                glEnd();
-
-                //First Hidden Layer Plane 1 
-                glPointSize(3.0);
-                glBegin(GL_POINTS);
-                glColor4f(1.0, 1.0, 1.0, 0.05);
-                glVertex3f(0.1 + b, 0.1 + c, 0.4);
-                glEnd();
-                glBegin(GL_LINE_LOOP);
-                glColor4f(1.0, 1.0, 1.0, dead_transparency_line);
-                glVertex3f(0.1 + b, 0.1 + a, 0.0);
-                glVertex3f(0.1 + b, 0.1 + c, 0.4);
-                glVertex3f(0.1 + b, 0.1 + c, 0.4);
-                glEnd();
-
-                //First Hidden Layer Plane 2
-                if (c < 0.47)
-                {
-                    glPointSize(3.0);
-                    glBegin(GL_POINTS);
-                    glVertex3f(0.1 + b, 0.1 + a, 0.0);
-                    glVertex3f(0.13 + b, 0.13 + c, 0.42);
-                    glEnd();
-                    glBegin(GL_LINE_LOOP);
-                    glColor4f(1.0, 1.0, 1.0, dead_transparency_line);
-                    glVertex3f(0.1 + b, 0.1 + a, 0.0);
-                    glVertex3f(0.13 + b, 0.13 + c, 0.42);
-                    glVertex3f(0.13 + b, 0.13 + c, 0.42);
-                    glEnd();
-                }
-
-                //First Hidden Layer Plane 3
-                glPointSize(3.0);
-                glBegin(GL_POINTS);
-                glVertex3f(0.1 + b, 0.1 + a, 0.0);
-                glVertex3f(0.07 + b, 0.07 + c, 0.42);
-                glVertex3f(0.07 + b, 0.07 + c, 0.42);
-                glEnd();
-                glBegin(GL_LINE_LOOP);
-                glColor4f(1.0, 1.0, 1.0, dead_transparency_line);
-                glVertex3f(0.1 + b, 0.1 + a, 0.0);
-                glVertex3f(0.07 + b, 0.07 + c, 0.42);
-                glVertex3f(0.07 + b, 0.07 + c, 0.42);
-                glEnd();
-
-                //First Hidden Layer Plane 4
-                if (c < 0.44)
-                {
-                    glPointSize(3.0);
-                    glBegin(GL_POINTS);
-                    glVertex3f(0.1 + b, 0.1 + a, 0.0);
-                    glVertex3f(0.17 + b, 0.16 + c, 0.44);
-                    glVertex3f(0.17 + b, 0.16 + c, 0.44);
-                    glEnd();
-                    glBegin(GL_LINE_LOOP);
-                    glColor4f(1.0, 1.0, 1.0, dead_transparency_line);
-                    glVertex3f(0.1 + b, 0.1 + a, 0.0);
-                    glVertex3f(0.17 + b, 0.16 + c, 0.44);
-                    glVertex3f(0.17 + b, 0.16 + c, 0.44);
-                    glEnd();
-                }
-
-                //Second Hidden Layer Plane 1 
-                glPointSize(3.0);
-                glBegin(GL_POINTS);
-                glColor4f(1.0, 1.0, 1.0, 0.05);
-                glVertex3f(0.1 + b, 0.1 + c, 0.8);
-                glVertex3f(0.1 + b, 0.1 + c, 0.8);
-                glEnd();
-                glBegin(GL_LINE_LOOP);
-                glColor4f(1.0, 1.0, 1.0, dead_transparency_line);
-                glVertex3f(0.1 + b, 0.1 + a, 0.4);
-                glVertex3f(0.1 + b, 0.1 + c, 0.8);
-                glVertex3f(0.1 + b, 0.1 + c, 0.8);
-                glEnd();
-
-                //Second Hidden Layer Plane 2
-                if (c < 0.47)
-                {
-                    glPointSize(3.0);
-                    glBegin(GL_POINTS);
-                    glVertex3f(0.1 + b, 0.1 + a, 0.42);
-                    glVertex3f(0.13 + b, 0.13 + c, 0.82);
-                    glVertex3f(0.13 + b, 0.13 + c, 0.82);
-                    glEnd();
-                    glBegin(GL_LINE_LOOP);
-                    glColor4f(1.0, 1.0, 1.0, dead_transparency_line);
-                    glVertex3f(0.1 + b, 0.1 + a, 0.0);
-                    glVertex3f(0.13 + b, 0.13 + c, 0.82);
-                    glVertex3f(0.13 + b, 0.13 + c, 0.82);
-                    glEnd();
-                }
-
-                //Output Layer
-                glPointSize(3.0);
-                glBegin(GL_POINTS);
-                glColor4f(1.0, 1.0, 1.0, 0.05);
-                glVertex3f(0.1 + b, 0.35, 1.2);
-                glVertex3f(0.1 + b, 0.35, 1.2);
-                glEnd();
-                glBegin(GL_LINE_LOOP);
-                glColor4f(1.0, 1.0, 1.0, dead_transparency_line);
-                glVertex3f(0.1 + b, 0.1 + c, 0.8);
-                glVertex3f(0.1 + a, 0.35, 1.2);
-                glVertex3f(0.1 + a, 0.35, 1.2);
-                glEnd();
-            }
-        }
+        glPointSize(5.0);
+        glBegin(GL_POINTS);
+        glColor4f(1.0, 1.0, 1.0, 0.2);
+        glVertex3f(a, 0.675, 3.75);
+        glEnd();
     }
-
+    
+    
     if (flag == true)
     {
-        //Inut image '1'
-        glPointSize(15.0);
-        glBegin(GL_POINTS);
-        glColor4f(0.0, 0.0, 1.0, 1.0);
-        glVertex3f(0.3, 0.2, 0.0);
-        glVertex3f(0.3, 0.3, 0.0);
-        glVertex3f(0.3, 0.4, 0.0);
-        glVertex3f(0.3, 0.5, 0.0);
-        glVertex3f(0.3, 0.6, 0.0);
-        glVertex3f(0.4, 0.5, 0.0);
-        glVertex3f(0.2, 0.2, 0.0);
-        glVertex3f(0.3, 0.2, 0.0);
-        glVertex3f(0.4, 0.2, 0.0);
-        glEnd();
+        int a1 = 27, b1 = 0;
 
-        //Highlighting the active neurons 
-        highlight_lines(0.3, 0.2, 0.0, live_transparency_line);
-        highlight_lines(0.3, 0.3, 0.0, live_transparency_line);
-        highlight_lines(0.3, 0.4, 0.0, live_transparency_line);
-        highlight_lines(0.3, 0.5, 0.0, live_transparency_line);
-        highlight_lines(0.3, 0.6, 0.0, live_transparency_line);
-        highlight_lines(0.4, 0.5, 0.0, live_transparency_line);
-        highlight_lines(0.2, 0.2, 0.0, live_transparency_line);
-        highlight_lines(0.3, 0.2, 0.0, live_transparency_line);
-        highlight_lines(0.4, 0.2, 0.0, live_transparency_line);
+        for (a = 0; a <= 1.35; a = a + 0.05)
+        {
+            b1 = 0;
+            for (b = 0; b <= 1.35; b = b + 0.05)
+            {
+                //Input Layer 
+                glPointSize(5.0);
+                glBegin(GL_POINTS);
+                glColor4f(0.0, 0.0, input_activation[select][a1 * 28 + b1], 1.0);
+                glVertex3f(0.05 + b, (0.05 + a), 0.0);
+                glEnd();
+                b1++;
+                //input_activation[0][a1 * 28 +b1]
+            }
+            a1--;
+        }
+        
+        a1 = 31, b1 = 0;
+        
+        //fc1
+        for (a = 0.275; a < 1.05; a += 0.025)
+        {
+            b1 = 0;
+            for (b = 0.275; b < 1.05; b += 0.025)
+            {
+                //fc1 
+                glPointSize(1.0);
+                glBegin(GL_POINTS);
+                glColor4f(0.0, fc1_activation[select][a1 * 32 + b1], 0.0, 1);
+                glVertex3f(0.025 + b, (0.025 + a), 0.75);
+                glEnd();
+                b1++;
+            }
+            a1--;
+        }
+        a1 = 31;
+        //fc2
+        for (a = 0.275; a < 1.05; a += 0.025)
+        {
+            b1 = 0;
+            for (b = 0.275; b < 1.05; b += 0.025)
+            {
+                //fc1 
+                glPointSize(1.0);
+                glBegin(GL_POINTS);
+                glColor4f(0.0, fc2_activation[select][a1 * 32 + b1], 0.0, 1);
+                glVertex3f(0.025 + b, (0.025 + a), 1.5);
+                glEnd();
+                b1++;
+            }
+            a1--;
+        }
+
+        a1 = 31;
+        //fc3
+        for (a = 0.275; a < 1.05; a += 0.025)
+        {
+            b1 = 0;
+            for (b = 0.275; b < 1.05; b += 0.025)
+            {
+                //fc3 
+                glPointSize(1.0);
+                glBegin(GL_POINTS);
+                glColor4f(fc3_activation[select][a1 * 32 + b1], 0.0, 0.0, 1);
+                glVertex3f(0.025 + b, (0.025 + a), 2.25);
+                glEnd();
+                b1++;
+            }
+            a1--;
+        }
+
+        a1 = 0;
+        //fc4
+
+        for (a = 0; a < 1.35; a += 0.135)
+        {
+            glPointSize(3.0);
+            glBegin(GL_POINTS);
+            glColor4f(0.0, 1.0, fc4_activation[0][a1], 1.0);
+            glVertex3f(a, 0.675, 3);
+            glEnd();
+            a1++;
+        }
+
+        //output
+        a1 = 0;
+        for (a = 0; a < 1.35; a += 0.135)
+        {
+            glPointSize(5.0);
+            glBegin(GL_POINTS);
+            glColor4f(1.0, output_activation[select][a1], 1.0, 1.0);
+            glVertex3f(a, 0.675, 3.75);
+            glEnd();
+            a1++;
+        }
+
+        
     }
+
+
     //Flushing the whole output
     glFlush();
     // sawp buffers called because we are using double buffering 
@@ -337,13 +342,155 @@ void reshapenetwork(int x, int y)
 
 void idlenetwork(GLFWwindow* window)
 {
-    yRotated += 0.05;
+    /*yRotated += 0.05;
+    if (leftMousePressed) {
+        yRotated += yPosDelta;
+    }
+    */
     displaynetwork(window);
+}
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+
+    /*
+    if (button == GLFW_MOUSE_BUTTON_LEFT)
+    {
+        double xpos, ypos;
+        glfwGetCursorPos(window, &xpos, &ypos);
+        yPosDelta = ypos - yposPrev;
+    }
+    */
+    if (action = GLFW_PRESS && button == GLFW_MOUSE_BUTTON_RIGHT) {
+        select++;
+    }
+    
+}
+
+static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    /*
+    yRotated = yRotated - (ypos - yPosPrev) * 0.05;
+    std::cout << yRotated << std::endl;
+    */
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    yRotated += yoffset * 2.0;
 }
 
 
 int main(int argc, char** argv)
 {
+    NpyArray inputLayer = getSelectedNumpyArray("input", "activity.npz");
+    NpyArray fc1 = getSelectedNumpyArray("fc1", "activity.npz");
+    NpyArray fc2 = getSelectedNumpyArray("fc2", "activity.npz");
+    NpyArray fc3 = getSelectedNumpyArray("fc3", "activity.npz");
+    NpyArray fc4 = getSelectedNumpyArray("fc4", "activity.npz");
+    NpyArray output = getSelectedNumpyArray("output", "activity.npz");
+
+    vector <float> temp1;
+    
+    for (int slice_data =0; slice_data < 100; slice_data++ )
+    {
+        //input layer
+        for (int x = 0; x < 28 * 28; x++)
+        {
+            temp1.push_back(inputLayer.DataVector<float>()[slice_data * 28*28 + x]);
+            
+        }
+        input_activation.push_back(temp1);
+        temp1.clear();
+        
+        //fc1
+        // 
+        for (int x = 0; x < 32 * 32; x++)
+        {
+            temp1.push_back(fc1.DataVector<float>()[slice_data * 32*32 + x]);
+
+        }
+        fc1_activation.push_back(temp1);
+        temp1.clear();
+
+        
+        //fc2
+        // 
+        for (int x = 0; x < 32 * 32; x++)
+        {
+            temp1.push_back(fc2.DataVector<float>()[slice_data * 32*32 + x]);
+
+        }
+        fc2_activation.push_back(temp1);
+        temp1.clear();
+        
+        //fc3
+        // 
+        for (int x = 0; x < 32 * 32; x++)
+        {
+            temp1.push_back(fc3.DataVector<float>()[slice_data * 32*32 + x]);
+
+        }
+        fc3_activation.push_back(temp1);
+        temp1.clear();
+
+        //cout << fc4.Shape()[2] << endl;
+
+        
+        
+        //fc4
+        // 
+        //vector<float> temp11;
+        //std::cout << fc4.Shape()[2] << endl;
+        std::cout << slice_data << endl;
+        float max = INT_MIN;
+
+        for (int x = 0; x < 10; x++)
+        {
+            float val = fc4.DataVector<float>()[slice_data * 10 + x];
+            if (val > max) {
+                max = val;
+            }
+            temp1.push_back(val);
+        }
+
+        if (max != 0.0) {
+            for (int x = 0; x < 10; x++)
+            {
+                temp1.push_back(temp1[x] / max);
+            }
+        }
+
+        std::cout << slice_data << endl;
+        fc4_activation.push_back(temp1);
+        temp1.clear();
+        
+        //output
+        // 
+
+        max = INT_MIN;
+        for (int x = 0; x < 10; x++)
+        {
+            float val = output.DataVector<float>()[slice_data * 10 + x];
+            if (val > max) {
+                max = val;
+            }
+            temp1.push_back(val);
+        }
+
+        if (max != 0.0) {
+            for (int x = 0; x < 10; x++)
+            {
+                temp1.push_back(temp1[x] / max);
+            }
+        }
+        output_activation.push_back(temp1);
+        temp1.clear();
+        
+        
+    }
+    
+    // 
     //Initialize GLUT
     glfwInit();
 
@@ -373,6 +520,9 @@ int main(int argc, char** argv)
         displaynetwork(window);
         reshapenetwork(1350, 950);
         idlenetwork(window);
+        glfwSetMouseButtonCallback(window, mouse_button_callback);
+        //glfwSetCursorPosCallback(window, cursor_position_callback);
+        glfwSetScrollCallback(window, scroll_callback);
         glfwPollEvents();
     }
     //Assign  the function used in events
