@@ -1,7 +1,10 @@
+
+
+
 #define GLEW_STATIC
 #include <GLEW/glew.h>
 #include <GLFW/glfw3.h>
-
+#include <neuralNetworkParser.h>
 
 #include <stdio.h>
 #define USE_MATH_DEFINES
@@ -44,7 +47,7 @@ void glhPerspectivef2(float* matrix, float fovyInDegrees, float aspectRatio,
 {
     float ymax, xmax;
     float temp, temp2, temp3, temp4;
-    ymax = znear * tanf(fovyInDegrees * 3.14159  / 360.0);
+    ymax = znear * tanf(fovyInDegrees * 3.14159 / 360.0);
     // ymin = -ymax;
     // xmin = -ymax * aspectRatio;
     xmax = ymax * aspectRatio;
@@ -171,7 +174,7 @@ void displaynetwork(GLFWwindow* window)
                 //Input Layer 
                 glPointSize(15.0);
                 glBegin(GL_POINTS);
-                glColor4f(1.0, 1.0, 1.0, 0.05);
+                glColor4f(1.0, 1.0, 1.0, 0);
                 glVertex3f(0.1 + b, 0.1 + a, 0.0);
                 glEnd();
 
@@ -376,3 +379,4 @@ int main(int argc, char** argv)
 
     return 0;
 }
+
