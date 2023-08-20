@@ -28,4 +28,4 @@ The neural network model and the data record was highly influenced by her amazin
 License
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-Feel free to contribute to this project by submitting issues or pull requests. If you have any questions or need assistance, please contact your@email.com. Happy visualizing!
+Feel free to contribute to this project by submitting issues or pull requests. Happy visualizing!
