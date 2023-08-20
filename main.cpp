@@ -5,7 +5,9 @@
 #include <GLEW/glew.h>
 #include <GLFW/glfw3.h>
 #include <neuralNetworkParser.h>
-
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl2.h>
 #include <stdio.h>
 #define USE_MATH_DEFINES
 #include <math.h>
@@ -13,6 +15,7 @@
 #include <conio.h>
 #include "iostream"
 #include <time.h>
+#include "main.h"
 static double yPosDelta = 0.0;
 static double xPosDelta = 0.0;
 static double xRotationDelta = 0.0;
@@ -25,7 +28,7 @@ std::vector<std::vector<float> > fc3_activation;
 std::vector<std::vector<float> > fc4_activation;
 std::vector<std::vector<float> > output_activation;
 
-
+float g_wallColor[3] = { 1, 1, 1 };
 
 //static vector< vector<float> > input_activation;
 
@@ -72,20 +75,23 @@ void glhPerspectivef2(float* matrix, float fovyInDegrees, float aspectRatio,
 
 using namespace std;
 
-bool flag = false;
+static bool g_flag = false;
 GLfloat xRotated, yRotated, zRotated;
+static float g_fov = 21.7;
+static float g_width = 1920;
+static float g_height = 1080;
 
 void check(int value)
 {
-    if (flag == true)
+    if (g_flag == true)
     {
-        flag = false;
+        g_flag = false;
     }
-    else if (flag == false)
+    else if (g_flag == false)
     {
-        flag = true;
+        g_flag = true;
     }
-    cout << flag << "\n";
+    cout << g_flag << "\n";
 
     //glutTimerFunc(1000, check, 0);
 }
@@ -180,6 +186,16 @@ void displayLine(GLfloat a1, GLfloat b1, GLfloat c1, GLfloat a2, GLfloat b2, GLf
     glEnd();
 }
 
+void DrawNumber(const char* charac, float x, float y)
+{
+    ImGui::SetNextWindowPos(ImVec2(x, y));
+    bool stfu = true;
+    char st[1] = { charac[0] };
+    ImGui::Begin(st, NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs);
+    ImGui::Text(charac);
+    ImGui::End();
+}
+
 void displaynetwork(GLFWwindow* window)
 {
     glMatrixMode(GL_MODELVIEW);
@@ -217,7 +233,8 @@ void displaynetwork(GLFWwindow* window)
             //Input Layer 
             glPointSize(5.0);
             glBegin(GL_POINTS);
-            glColor4f(0.0, 0.0, input_activation[select][a1 * 28 + b1], 1.0);
+            float input_acti = input_activation[select][a1 * 28 + b1];
+            glColor4f(g_wallColor[0] * input_acti, g_wallColor[1] * input_acti, g_wallColor[2] * input_acti, 1.0);
             glVertex3f(0.05 + b, (0.05 + a), 0.0);
             glEnd();
             b1++;
@@ -295,17 +312,21 @@ void displaynetwork(GLFWwindow* window)
 
     //output
     a1 = 0;
+    int width, height;
+    glfwGetWindowSize(window, &width, &height);
     for (a = 0; a < 1.35; a += 0.135)
     {
         glPointSize(5.0);
         glBegin(GL_POINTS);
         glColor4f(1.0, output_activation[select][a1], 1.0, 1.0);
         glVertex3f(a, 0.675, 3.75);
+
+        //DrawNumber(std::to_string(a1).c_str(), screenpos[0], screenpos[1]);
         glEnd();
         a1++;
     }
 
-    if (flag == true)
+    if (g_flag == true)
     {
         // display the networks
         for (int i = 0; i < 28; i++) {
@@ -343,7 +364,7 @@ void displaynetwork(GLFWwindow* window)
                         if (fc3_activation[select][(31 - j) * 32 + j1] > 0.4) {
                             float a1 = i * 0.025 + 0.025 + 0.275, b1 = (i1 + 1) * 0.025 + 0.275;
                             float a2 = (j + 1) * 0.025 + 0.275, b2 = (j1 + 1) * 0.025 + 0.275;
-                            displayLine(b1, a1, 1.5, a2, b2, 2.25, fc2_activation[select][(31 - i) * 32 + i1], 0, 0, 1);
+                            displayLine(b1, a1, 1.5, a2, b2, 2.25, fc2_activation[select][(31 - i) * 32 + i1], 1, 1, 0);
                         }
                     }
                 }
@@ -356,7 +377,7 @@ void displaynetwork(GLFWwindow* window)
                     if (fc4_activation[select][j] > 0.4) {
                         float a1 = i * 0.025 + 0.025 + 0.275, b1 = (i1 + 1) * 0.025 + 0.275;
                         float a2 = (j) * 0.135, b2 = 0.675;
-                        displayLine(b1, a1, 2.25, a2, b2, 3, fc3_activation[select][(31 - i) * 32 + i1] * 5, 0, 1, 1);
+                        displayLine(b1, a1, 2.25, a2, b2, 3, fc3_activation[select][(31 - i) * 32 + i1] * 5, 1, 1, 1);
                     }
                 }
             }
@@ -378,9 +399,11 @@ void displaynetwork(GLFWwindow* window)
 
     //Flushing the whole output
     glFlush();
-    // sawp buffers called because we are using double buffering 
-    glfwSwapBuffers(window);
 }
+
+static float g_xtranslate = -0.04f;
+static float g_ytranslate = 0.645f;
+static float g_ztranslate = 0.0f;
 
 void reshapenetwork(int x, int y)
 {
@@ -390,10 +413,11 @@ void reshapenetwork(int x, int y)
     glLoadIdentity();
     //Angle of view:40 degrees
     float projMatrix[16];
-    glhPerspectivef2(projMatrix, 40.0, (GLdouble)x / (GLdouble)y, 0.5, 20.0);
+    glhPerspectivef2(projMatrix, g_fov, (GLdouble)g_width / (GLdouble)g_height, 0.5, 20.0);
+    glTranslatef(g_xtranslate, g_ytranslate, g_ztranslate);
     //gluPerspective(40.0, (GLdouble)x / (GLdouble)y, 0.5, 20.0);
     glMultMatrixf(projMatrix);  // Load the manually created matrix
-
+    
     glViewport(0, 0, x, y);  //Use the whole window for rendering
 }
 
@@ -413,7 +437,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
     {
-        flag = !flag;
+        g_flag = !g_flag;
     }
     
     if (action = GLFW_PRESS && button == GLFW_MOUSE_BUTTON_RIGHT) {
@@ -434,6 +458,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     yRotated += yoffset * 2.0;
 }
+
+
 
 
 int main(int argc, char** argv)
@@ -497,7 +523,7 @@ int main(int argc, char** argv)
         // 
         //vector<float> temp11;
         //std::cout << fc4.Shape()[2] << endl;
-        std::cout << slice_data << endl;
+        //std::cout << slice_data << endl;
         float max = INT_MIN;
 
         for (int x = 0; x < 10; x++)
@@ -516,7 +542,7 @@ int main(int argc, char** argv)
             }
         }
 
-        std::cout << slice_data << endl;
+        //std::cout << slice_data << endl;
         fc4_activation.push_back(temp1);
         temp1.clear();
         
@@ -551,35 +577,110 @@ int main(int argc, char** argv)
 
     //double buffering used to avoid flickering problem in animation
     // window size
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 1);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     GLFWwindow* window = glfwCreateWindow(1350, 950, "GP", nullptr, nullptr);
     glewInit();
     glfwMakeContextCurrent(window);
     // create the window 
+   
+
+    //glfwSetCursorPosCallback(window, cursor_position_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+    //ImGui::StyleColorsLight();
+
+    // Setup Platform/Renderer backends
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL2_Init();
+    // Our state
+    bool show_demo_window = true;
+    bool show_another_window = false;
+    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     yRotated = 40;
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-
+    bool should_animate = false;
+    float delay = 0.5f;
+    float time = glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
+        glfwPollEvents();
+        // Start the Dear ImGui frame
+        ImGui_ImplOpenGL2_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        ImGui::Begin("Neural Network");
+        ImGui::SliderFloat("FOV", &g_fov, 0, 100);
+        ImGui::SliderFloat("Aspect", &g_width, 0, 4000);
+
+        if (!should_animate) {
+            ImGui::SliderInt("Select", &select, 0, 99);
+        }
+
+        ImGui::SliderFloat("translate X", &g_xtranslate, -1.0f, 1.0f);
+        ImGui::SliderFloat("translate Y", &g_ytranslate, -1.0f, 1.0f);
+        ImGui::SliderFloat("translate Z", &g_ztranslate, -1.0f, 1.0f);
+        ImGui::SliderFloat("Animation Delay", &delay, 0, 3);
+
+        ImGui::Checkbox("Show Lines", &g_flag);
+        ImGui::Checkbox("Animate", &should_animate);
+
+        ImGui::Spacing();
+
+        ImGui::ColorPicker3("Wall Color", g_wallColor);
+        ImGui::End();
+        if (should_animate)
+        {
+            if (glfwGetTime() - time > delay)
+            {
+                select = (select + 1) % 100;
+                time = glfwGetTime();
+            }
+        }
+     
+
+
+            // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         //glutDisplayFunc(displaynetwork);
         //glutReshapeFunc(reshapenetwork);
         //glutIdleFunc(idlenetwork);
         //Let start glut loop
         //glutTimerFunc(100, check, 0);
         //glutMainLoop();
+
+
         displaynetwork(window);
         reshapenetwork(1350, 950);
         idlenetwork(window);
-        glfwSetMouseButtonCallback(window, mouse_button_callback);
-        //glfwSetCursorPosCallback(window, cursor_position_callback);
-        glfwSetScrollCallback(window, scroll_callback);
-        glfwPollEvents();
+
+
+        ImGui::Render();
+        int height, width;
+        glfwGetFramebufferSize(window, &width, &height);
+        glViewport(0, 0, width, height);
+        
+        ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+
+        // sawp buffers called because we are using double buffering 
+        glfwSwapBuffers(window);
+
+
     }
+    ImGui_ImplOpenGL2_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
     //Assign  the function used in events
 
     return 0;
