@@ -24,7 +24,7 @@ The Neural Network Visualizer with OpenGL is a tool designed to visualize the ac
 
 # Credits
 This project is inspired by the excellent work in neural network visualization and utilizes the power of OpenGL for interactive 3D graphics.
-Heavily inspired by : Marijn van Vliet https://youtu.be/Tsvxx-GGlTg](https://github.com/wmvanvliet/scns/tree/main/visualizations/multilayer_perceptron
+Heavily inspired by : Marijn van Vliet (https://github.com/wmvanvliet/scns/tree/main/visualizations/multilayer_perceptron).
 The neural network model and the data record was highly influenced by her amazing project.
 
 
