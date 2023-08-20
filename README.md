@@ -1,8 +1,7 @@
 # Neural Network Visualizer
 The Neural Network Visualizer with OpenGL is a tool designed to visualize the activity data of a trained neural network using the MNIST dataset. This visualizer takes the activity data of from hidden layers of the neural network on 100 sample data. The neural network has been trained on 60k, of the MNIST dataset and provides an interactive 3D representation of the neural network's internal activations.
 
-
-![image3](https://github.com/dead-fool/neural-network-visualizer/assets/66507877/5cb31a42-cc3a-48cc-b860-c61f4224eb6f)
+![image](https://github.com/dead-fool/neural-network-visualizer/assets/66507877/789465ef-af98-4251-930d-f59d4d7c6420)
 
 ## Features
 * Parse .npz file of activity data saved as compressed numpy arrays.
