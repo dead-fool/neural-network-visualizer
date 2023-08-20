@@ -15,8 +15,11 @@ Easy-to-use interface for exploring neural network behavior.
 # Prerequisites
 Before using the Neural Network Visualizer, ensure you have the following:
 
-Trained neural network model (trained on MNIST) 
-Activity data for hidden layers (100 samples) as .npz file(example in the project)
+Trained neural network model (trained on MNIST) .
+Activity data for hidden layers (100 samples) as .npz file(example in the project).
+OpenGL
+GLFW
+IMGUI
 
 
 # Credits
