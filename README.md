@@ -5,21 +5,21 @@ The Neural Network Visualizer with OpenGL is a tool designed to visualize the ac
 ![image3](https://github.com/dead-fool/neural-network-visualizer/assets/66507877/5cb31a42-cc3a-48cc-b860-c61f4224eb6f)
 
 ## Features
-Parse .npz file of activity data saved as compressed numpy arrays.
-Visualize the activity data of a trained neural network's hidden layers.
-Interact with the 3D representation of neural network activations.
-Supports visualization of multiple hidden layers.
-Color mapping to represent activation intensity.
-Easy-to-use interface for exploring neural network behavior.
+* Parse .npz file of activity data saved as compressed numpy arrays.
+* Visualize the activity data of a trained neural network's hidden layers.
+* Interact with the 3D representation of neural network activations.
+* Supports visualization of multiple hidden layers.
+* Color mapping to represent activation intensity.
+* Easy-to-use interface for exploring neural network behavior.
 
 # Prerequisites
-Before using the Neural Network Visualizer, ensure you have the following:
+ Before using the Neural Network Visualizer, ensure you have the following:
 
-Trained neural network model (trained on MNIST) .
-Activity data for hidden layers (100 samples) as .npz file(example in the project).
-OpenGL
-GLFW
-IMGUI
+* Trained neural network model (trained on MNIST) .
+* Activity data for hidden layers (100 samples) as .npz file(example in the project).
+* OpenGL
+* GLFW
+* IMGUI
 
 
 # Credits
